@@ -3,9 +3,9 @@
     site-specific config
 */
 
-$site_title = 'w-w-w';
+$site_title = 'w-o-r-l-d-w-i-d-e-w-e-b';
 $head = 'Hello';
-$site = 'w-w-w-orld.';
+$site = 'w-o-r-l-d-w-i-d-e-w-e-b';
 $home = $head . ", " . $site;
 $card_default = '/media/jpg/card-default.jpg';
 $logo_src = '/media/jpg/logo.jpg';
