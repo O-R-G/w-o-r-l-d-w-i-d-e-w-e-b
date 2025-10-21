@@ -32,9 +32,37 @@
             this.images = document.querySelectorAll('img:not(.prevent-windowfull)');
             for(let i = 0; i < this.images.length; i++) 
                 this.images[i].setAttribute('windowfull-index', i);
+            // this.safeAreaInsets = this.getSafeAreaInsets();
+            // console.log('insets', this.safeAreaInsets);
             this.renderElements();
             this.getElements();
             this.addListeners();
+        },
+        getSafeAreaInsets: function(){
+            /* 
+                for safari on iOS26 and above...
+            */
+            const div = document.createElement('div');
+            div.style.cssText = `
+                padding-top: env(safe-area-inset-top);
+                padding-right: env(safe-area-inset-right);
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-left: env(safe-area-inset-left);
+            `;
+            document.body.appendChild(div);
+
+            const computed = window.getComputedStyle(div);
+            console.log(computed.paddingTop);
+            console.log(computed.getPropertyValue('padding-top'));
+            console.log(computed.paddingBottom);
+            console.log(computed.getPropertyValue('padding-bottom'));
+            const insets = {
+                top: parseFloat(computed.paddingTop) || 0,
+                bottom: parseFloat(computed.paddingBottom) || 0
+            };
+
+            // div.remove();
+            return insets;
         },
         renderElements: function(){
             this.elements.container.innerHTML += '<div id="fullwindow-image-wrapper"><img id="fullwindow-image" class="prevent-windowfull fullwindow"></div>';
@@ -85,7 +113,9 @@
                 });
             }
             
-            
+            window.addEventListener('load', ()=>{
+                this.safeAreaInsets = this.getSafeAreaInsets();
+            })
         },
         request: function (element) {
             if(element.tagName.toLowerCase() !== 'img' || !this.elements.img || !this.elements.caption) return;
@@ -106,6 +136,10 @@
         exit: function () {
             // if(element.tagName.toLowerCase() !== 'img' || !this.elements.img || !this.elements.caption) return;
             // document.body.style.overflow = 'initial';
+            // const root = document.querySelector(':root');
+            // root.style.height = 'auto';
+            // root.style.overflow = 'visible';
+            // this.currentIndex = i;
             document.body.classList.remove('viewing-fullwindow-caption');
             document.body.classList.remove('viewing-fullwindow');
         },
@@ -114,6 +148,9 @@
             return this.isFullwindow ? this.exit(element) : this.request(element);
         },
         launch: function(i){
+            // const root = document.querySelector(':root');
+            // root.style.height = '100svh';
+            // root.style.overflow = 'hidden';
             this.currentIndex = i;
             if(this.isGallery)
                 this.updateBtnStates();

@@ -5,13 +5,13 @@
 }
 
 html, body {
-	height: 100%;
+	/* height: 100%; */
 }
 
 body {
 	margin: 0;
-	width: 100%;
-	height: 100%;
+	/* width: 100%; */
+	/* height: 100%; */
 	font-family: sf-text, Helvetica, Arial, sans-serif;
 	font-size: 18px;
 	line-height: 22px;	
@@ -154,7 +154,7 @@ blockquote {
 
 #fullscreen {
 	/* width: auto; */
-	height: auto;
+	/* height: auto; */
 }
 
 #fullscreen:-webkit-full-screen,
@@ -209,10 +209,18 @@ blockquote {
     margin: 0px;
     width: 100vw;
     max-width: 100%;
+    height: 100vh;
     height: 100dvh;
     box-sizing: border-box;
     background-color: #000;
     z-index: +3;
+}
+body.viewing-fullwindow {
+    background-color: #000;
+}
+.viewing-fullwindow #main{
+    opacity: 0;
+    pointer-events: none;
 }
 .viewing-fullwindow #fullwindow {
     display: block;
@@ -284,10 +292,11 @@ blockquote {
     margin: 0px;
     width: 100vw;
     max-width: 100%;
-    height: 100vh;
     box-sizing: border-box;
     background-color: #000;
     z-index: 2000;
+    height: 100vh;
+    height: 100dvh;
 }
 
 #screenfull-image-wrapper {
