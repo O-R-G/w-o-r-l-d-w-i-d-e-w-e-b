@@ -49,36 +49,6 @@ class ScreenfullExtended {
             this.images[i].setAttribute('screenfull-index', i);
         }
     }
-    getSafeAreaInsets(){
-        /* 
-            for safari on iOS26 and above...
-        */
-        const div = document.createElement('div');
-        div.style.cssText = `
-            position: absolute;
-            top: 0;
-            left: 0;
-            visibility: hidden;
-            padding-top: env(safe-area-inset-top);
-            padding-right: env(safe-area-inset-right);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-        `;
-        document.body.appendChild(div);
-
-        const computed = window.getComputedStyle(div);
-        console.log(computed.paddingTop);
-        console.log(computed.getPropertyValue('padding-top'));
-        console.log(computed.paddingBottom);
-        console.log(computed.getPropertyValue('paddingBottom'));
-        const insets = {
-            top: parseFloat(computed.paddingTop) || 0,
-            bottom: parseFloat(computed.paddingBottom) || 0
-        };
-
-        div.remove();
-        return insets;
-    }
     renderElements() {
         this.elements.container.innerHTML += '<div id="screenfull-image-wrapper"><img id="screenfull-image" class="screenfull"></div>';
         if (this.isGallery) {
@@ -109,8 +79,6 @@ class ScreenfullExtended {
             const image = this.images[i];
             image.classList.add('screenfull-trigger');
             image.addEventListener('click', () => {
-                this.scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                this.elements.container.style.top = this.scrollTop - this.safeAreaInsets.top + 'px';
                 this.extRequest(image);
             });
             this.elements.triggers.push(image);
@@ -118,19 +86,23 @@ class ScreenfullExtended {
 
         if (this.elements.closeBtn) {
             this.elements.closeBtn.addEventListener('click', () => {
-                this.screenfull.exit();
+                this.screenfull.extWxit();
             });
         }
-
         if (this.isGallery && this.elements.nextBtn && this.elements.prevBtn) {
             this.elements.nextBtn.addEventListener('click', () => this.next());
             this.elements.prevBtn.addEventListener('click', () => this.prev());
             window.addEventListener('keydown', (e) => {
                 if (!document.body.classList.contains('viewing-screenfull')) return;
-                if (e.keyCode == 39)
+                if (e.key == 'ArrowRight')
                     this.next();
-                else if (e.keyCode == 37)
+                else if (e.key == 'ArrowLeft')
                     this.prev();
+            });
+        }
+        if(!this.isGallery) {
+            this.container.addEventListener('click', ()=>{
+                this.extExit();
             });
         }
 
@@ -152,9 +124,6 @@ class ScreenfullExtended {
 
         this.elements.container.addEventListener('mousemove', this.delayHidingControls.bind(this));
         this.elements.container.addEventListener('click', this.delayHidingControls.bind(this));
-        window.addEventListener('load', ()=>{
-            this.safeAreaInsets = this.getSafeAreaInsets();
-        })
     }
 
     next() {
@@ -207,7 +176,6 @@ class ScreenfullExtended {
     }
 
     extExit() {
-        console.log('extExit');
         if (this.timer) clearTimeout(this.timer);
         document.body.classList.remove('viewing-screenfull-caption');
         document.body.classList.remove('viewing-screenfull');
