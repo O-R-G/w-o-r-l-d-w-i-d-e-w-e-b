@@ -17,6 +17,8 @@ body {
 	line-height: 22px;	
 	-webkit-font-smoothing: subpixel-antialiased;
 	-webkit-text-size-adjust: 100%;
+    color: #FFF;
+    background-color: #000;
 }
 
 p {
@@ -35,12 +37,12 @@ canvas {
 
 a:link,
 a:visited {
-    color: #00F;
+    color: #0F0;
     text-decoration: none;
 }
 
 a:hover {
-    color: #000;
+    color: #FFF;
 }
 
 a:active {
@@ -92,7 +94,10 @@ blockquote {
 #badge {
 	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
-
+#badge.large {
+    width: 80vh;
+    margin: 0 auto;
+}
 #badge-container.lower-right {
 	bottom: 0px;
 	width: initial;
@@ -124,7 +129,7 @@ blockquote {
 }
 
 #notes {
-    border-top: 1px solid #000;
+    border-top: 1px solid #FFF;
     margin-top: 33px;
     padding-top: 10px;
     padding-bottom: 33vw;
@@ -162,7 +167,6 @@ blockquote {
     /* vw = viewport width % */
     /* height based on width */
 	height: 80vh;
-    width: 80vh;
 }
 
 .small {
