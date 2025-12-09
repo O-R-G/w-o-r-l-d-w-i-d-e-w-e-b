@@ -1,3 +1,12 @@
+/* 
+    badge.js
+     
+    generic, should be replaced per site
+    to draw and update the badge
+
+    based on https://codepen.io/Metrophobe/pen/VjeMyX
+*/
+
 class Badge {
   constructor(container = document.getElementById('badge')) {
     this.container = container;
@@ -18,7 +27,6 @@ class Badge {
         step: 1,
         increasing: true
     };
-    
     this.phil = {
         current: 6.28,
         max: 6.28,
@@ -45,7 +53,11 @@ class Badge {
     this.camera = new THREE.PerspectiveCamera(60, this.width / this.height, 1, 3000);
     this.camera.position.z = 1000;
 
-    this.renderer = new THREE.WebGLRenderer();
+	this.renderer = new THREE.WebGLRenderer({
+  		alpha: true,
+  		antialias: true
+	});
+	this.renderer.setClearColor(0x000000, 0);   
     this.renderer.setSize(this.width, this.height);
     this.container.appendChild(this.renderer.domElement);
   }
@@ -96,10 +108,11 @@ class Badge {
         //     this.updateTriangle();
         //     this.updatePhil();
         // }
-        this.updateTriangle();
-        this.updatePhil();
+        // this.updateTriangle();
+        // this.updatePhil();
         this.updateSphere();
-        this.updateSphere_counter -= steps * 3;
+        // this.updateSphere_counter -= steps * 3;
+        this.updateSphere_counter -= steps * 5;
     }
     
     
