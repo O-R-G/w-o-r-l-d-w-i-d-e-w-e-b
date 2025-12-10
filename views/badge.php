@@ -28,6 +28,7 @@ if(!$uu->id) {
     } else {
         ?><div id="badge-container" class="lower-right">
             <div id='badge' class='small badge'>
+
             </div>
         </div><?
     }

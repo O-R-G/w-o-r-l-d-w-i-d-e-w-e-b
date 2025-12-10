@@ -94,10 +94,7 @@ blockquote {
 #badge {
 	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
-#badge.large {
-    width: 80vh;
-    margin: 0 auto;
-}
+
 #badge-container.lower-right {
 	bottom: 0px;
 	width: initial;
