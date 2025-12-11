@@ -47,10 +47,8 @@ class Badge {
   }
 
   init() {
-    this.width = this.container.offsetWidth;
-    this.height = this.container.offsetHeight;
-
-    // console.log(this.width);
+    this.size = Math.min(this.container.offsetWidth, this.container.offsetHeight)
+    this.width = this.height = this.size;
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(60, this.width / this.height, 1, 3000);
