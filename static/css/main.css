@@ -147,11 +147,11 @@ blockquote {
 }
 
 #notes a[href$=".pdf"]::before {
-    background-image: url('/media/svg/pdf-1-k.svg');
+    background-image: url('/media/svg/pdf-1-w.svg');
 }
 
 #notes a:not([href$=".pdf"])::before {
-    background-image: url('/media/svg/arrow-up-right-1-k.svg');
+    background-image: url('/media/svg/arrow-up-right-1-w.svg');
 }
 /* classes */
 
