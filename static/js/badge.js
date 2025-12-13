@@ -54,13 +54,14 @@ class Badge {
     this.camera = new THREE.PerspectiveCamera(60, this.width / this.height, 1, 3000);
     this.camera.position.z = 1000;
 
+    const canvas = document.querySelector('#threejs-canvas');
 	this.renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
   		alpha: true,
   		antialias: true
 	});
 	this.renderer.setClearColor(0x000000, 0);   
     this.renderer.setSize(this.width, this.height);
-    this.container.appendChild(this.renderer.domElement);
   }
 
   createSphere() {
