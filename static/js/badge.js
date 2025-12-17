@@ -22,7 +22,8 @@ class Badge {
     this.thes = 0;
     this.thel = 3.14;
     this.triangles = {
-        current: 20,
+        // current: 20,
+        current: 4,
         max: 36,
         min: 2,
         step: 1,
