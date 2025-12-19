@@ -56,14 +56,16 @@ header {
 
 header.homepage {
 	z-index: 10;
+    display: inline-block;
 }
-
+header.homepage.hidden {
+    display: none;
+}
 ul {
 	list-style-type: none;
 	padding-left: 1em;
 	margin: 0px;
 }
-
 ul:first-child {
 	padding-left: 0px;
 }
@@ -94,7 +96,9 @@ blockquote {
 #badge {
 	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
-
+#badge > canvas {
+    /* cursor: pointer; */
+}
 #badge-container.lower-right {
 	bottom: 0px;
 	width: initial;

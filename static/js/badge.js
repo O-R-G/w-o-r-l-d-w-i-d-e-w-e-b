@@ -9,9 +9,10 @@
 */
 
 class Badge {
-  constructor(container = document.getElementById('badge')) {
+  constructor(container = document.getElementById('badge'), menu=document.getElementById('menu')) {
     this.container = container;
     if (!this.container) return;
+    this.menu = menu;
 
     this.xRot = 0.001;
     this.yRot = 0.001;
@@ -47,7 +48,10 @@ class Badge {
     this.worldAxisX = new THREE.Vector3(1, 0, 0);
     this.worldAxisY = new THREE.Vector3(0, 1, 0);
     this.tmpQuat = new THREE.Quaternion();
-
+    this.dragMoved = false;
+    this.isTouchDrag = false;
+    this.suppressClick = false;
+    this.menuIsExpanded = menu && !menu.classList.contains('hidden');
     this.init();
     
     this.createSphere();
@@ -58,7 +62,7 @@ class Badge {
     this.size = Math.min(this.container.offsetWidth, this.container.offsetHeight)
     this.width = this.height = this.size;
     this.initStage();
-    this.renderer.domElement.style.cursor = 'grab';
+    // this.renderer.domElement.style.cursor = 'grab';
     this.renderer.domElement.style.touchAction = 'none';
     this.addListeners();
   }
@@ -120,6 +124,14 @@ class Badge {
         this.handlePointerUp();
       });
     }
+    // el.addEventListener('click', (event)=>{
+    //   this.handleClick(event);
+    // });
+    if (this.container && this.container !== el) {
+      this.container.addEventListener('click', (event)=>{
+        this.handleContainerClick(event);
+      }, true);
+    }
   }
   createSphere() {
     this.sphere = new THREE.Mesh(
@@ -142,7 +154,7 @@ class Badge {
 
   updateSphere() {
     if (!this.scene || !this.sphere) {
-      console.log('r');
+      // console.log('r');
       return;
     }
     // this.sphere.needsUpdate = true;
@@ -209,17 +221,27 @@ class Badge {
     }
   }
   handlePointerDown(e){
+    if(menu && !menu.classList.contains('hidden')) return;
+    // menu is not open
     this.pause();
     this.pointerIsDown = true;
+    this.dragMoved = false;
+    // console.log('handlePointerDown');
+    // console.log(e.pointerType, e.type, e.touches);
+    this.isTouchDrag = e.pointerType === 'touch' || e.type === 'touchstart' || !!e.touches;
+    // console.log('isTouchDrag', this.isTouchDrag);
     this.pointerLastX = e.clientX;
     this.pointerLastY = e.clientY;
     this.renderer.domElement.style.cursor = 'grabbing';
   }
   handlePointerMove(e){
     if(!this.pointerIsDown) return;
-    // console.log('move');
     const dx = e.clientX - this.pointerLastX,
     dy = e.clientY - this.pointerLastY;
+    if(Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
+      return;
+    }
+    this.dragMoved = true;
     this.pointerLastX = e.clientX;
     this.pointerLastY = e.clientY;
     const dev = 0.005;
@@ -231,11 +253,15 @@ class Badge {
   }
   
   handlePointerUp(){
-    // console.log('up');
     if(!this.pointerIsDown) return;
     this.pointerIsDown = false;
+    if (this.isTouchDrag) {
+      this.suppressClick = true; // block synthetic click after touch drag
+      setTimeout(() => { this.suppressClick = false; }, 0);
+    }
+    this.isTouchDrag = false;
     this.resume();
-    this.renderer.domElement.style.cursor = 'grab';
+    this.renderer.domElement.style.cursor = 'auto';
   }
   handleTouchStart(e){
     if (!e.touches || e.touches.length === 0) return;
@@ -250,6 +276,21 @@ class Badge {
     const touch = e.touches[0];
     this.handlePointerMove(touch);
   }
+  handleClick(e){
+    if (this.suppressClick || this.dragMoved) {
+      e.stopPropagation();
+      e.preventDefault();
+      return;
+    }
+  }
+  handleContainerClick(e){
+    // preventing menu from opening when dragging
+    console.log(this.suppressClick, this.dragMoved);
+    if (this.suppressClick || this.dragMoved) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  }
   rotateAroundWorldAxis(obj, axis, angle) {
     // Custom world-axis rotation for builds lacking Object3D.rotateOnWorldAxis
     this.tmpQuat.setFromAxisAngle(axis, angle);
@@ -261,11 +302,12 @@ class Badge {
   }
   pause(){
     if(this.timer) {
-        cancelAnimationFrame(this.timer);
-        this.timer = null;
+      cancelAnimationFrame(this.timer);
+      this.timer = null;
     }
   }
   start_stop(){
+    console.log('start_stop');
     if(this.isPlaying) {
         this.pause();
     } else {
@@ -275,5 +317,5 @@ class Badge {
   }
 }
 
-const badgeContainer = document.getElementById('badge');
-const badge = new Badge(badgeContainer);
+const canvasContainer = document.getElementById('badge');
+const badge = new Badge(canvasContainer);
