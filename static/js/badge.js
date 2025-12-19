@@ -41,30 +41,86 @@ class Badge {
     this.timer = null;
     this.lastTime = null;
     this.isPlaying = true;
+    this.pointerIsDown = false;
+    this.pointerLastX = 0;
+    this.pointerLastY = 0;
+    this.worldAxisX = new THREE.Vector3(1, 0, 0);
+    this.worldAxisY = new THREE.Vector3(0, 1, 0);
+    this.tmpQuat = new THREE.Quaternion();
 
     this.init();
+    
     this.createSphere();
-    this.update();
+    this.animate();
   }
 
   init() {
     this.size = Math.min(this.container.offsetWidth, this.container.offsetHeight)
     this.width = this.height = this.size;
-
+    this.initStage();
+    this.renderer.domElement.style.cursor = 'grab';
+    this.renderer.domElement.style.touchAction = 'none';
+    this.addListeners();
+  }
+  initStage(){
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(60, this.width / this.height, 1, 3000);
     this.camera.position.z = 1000;
 
     const canvas = document.querySelector('#threejs-canvas');
-	this.renderer = new THREE.WebGLRenderer({
+    this.renderer = new THREE.WebGLRenderer({
         canvas: canvas,
-  		alpha: true,
-  		antialias: true
-	});
-	this.renderer.setClearColor(0x000000, 0);   
+        alpha: true,
+        antialias: true
+    });
+    this.renderer.setClearColor(0x000000, 0);   
     this.renderer.setSize(this.width, this.height);
   }
-
+  addListeners(){
+    const el = this.renderer.domElement;
+    if (window.PointerEvent) {
+      el.addEventListener('pointerdown', (event)=>{
+        this.handlePointerDown(event);
+      });
+      el.addEventListener('pointermove', (event)=>{
+        this.handlePointerMove(event);
+      });
+      el.addEventListener('pointerup', (event)=>{
+        this.handlePointerUp(event);
+      });
+      el.addEventListener('pointercancel', (event)=>{
+        this.handlePointerUp(event);
+      });
+      el.addEventListener('pointerleave', (event)=>{
+        this.handlePointerUp(event);
+      });
+    } else {
+      el.addEventListener('mousedown', (event)=>{
+        this.handlePointerDown(event);
+      });
+      el.addEventListener('mousemove', (event)=>{
+        this.handlePointerMove(event);
+      });
+      el.addEventListener('mouseup', ()=>{
+        this.handlePointerUp();
+      });
+      el.addEventListener('mouseleave', ()=>{
+        this.handlePointerUp();
+      });
+      el.addEventListener('touchstart', (event)=>{
+        this.handleTouchStart(event);
+      }, { passive: false });
+      el.addEventListener('touchmove', (event)=>{
+        this.handleTouchMove(event);
+      }, { passive: false });
+      el.addEventListener('touchend', ()=>{
+        this.handlePointerUp();
+      });
+      el.addEventListener('touchcancel', ()=>{
+        this.handlePointerUp();
+      });
+    }
+  }
   createSphere() {
     this.sphere = new THREE.Mesh(
       new THREE.SphereGeometry(
@@ -85,38 +141,45 @@ class Badge {
   }
 
   updateSphere() {
-    if (!this.scene || !this.sphere) return;
-    const oldRotationX = this.sphere.rotation.x;
-    const oldRotationY = this.sphere.rotation.y;
-    const oldRotationZ = this.sphere.rotation.z;
-    this.scene.remove(this.sphere);
-    this.createSphere();
-    this.sphere.rotation.x = oldRotationX;
-    this.sphere.rotation.y = oldRotationY;
-    this.sphere.rotation.z = oldRotationZ;
+    if (!this.scene || !this.sphere) {
+      console.log('r');
+      return;
+    }
+    // this.sphere.needsUpdate = true;
+    // const oldRotationX = this.sphere.rotation.x;
+    // const oldRotationY = this.sphere.rotation.y;
+    // const oldRotationZ = this.sphere.rotation.z;
+    // this.scene.remove(this.sphere);
+    // this.createSphere();
+    // console.log(oldRotationX, oldRotationY);
+    // this.sphere.rotation.x = oldRotationX;
+    // this.sphere.rotation.y = oldRotationY;
+    // this.sphere.rotation.z = oldRotationZ;
   }
 
-  update(timestamp = performance.now()) {
+  animate(timestamp = performance.now()) {
     if (!this.sphere) return;
-    this.timer = requestAnimationFrame((nextTs) => this.update(nextTs));
+    // console.log('animate');
+    this.timer = requestAnimationFrame((nextTs) => this.animate(nextTs));
     const frameDelta = this.lastTime ? (timestamp - this.lastTime) / 16.6667 : 1;
     this.lastTime = timestamp;
+    // console.log(this.sphere);
     this.sphere.rotation.x += this.xRot * frameDelta;
     this.sphere.rotation.y += this.yRot * frameDelta;
     this.sphere.rotation.z += this.zRot * frameDelta;
     this.updateSphere_counter += frameDelta; // accumulate frame-equivalent units
-    if (this.updateSphere_counter >= 3) {
-        const steps = Math.floor(this.updateSphere_counter / 3);
-        // for (let i = 0; i < steps; i++) {
-        //     this.updateTriangle();
-        //     this.updatePhil();
-        // }
-        // this.updateTriangle();
-        // this.updatePhil();
-        this.updateSphere();
-        // this.updateSphere_counter -= steps * 3;
-        this.updateSphere_counter -= steps * 5;
-    }
+    // if (this.updateSphere_counter >= 3) {
+    //     const steps = Math.floor(this.updateSphere_counter / 3);
+    //     // for (let i = 0; i < steps; i++) {
+    //     //     this.updateTriangle();
+    //     //     this.updatePhil();
+    //     // }
+    //     // this.updateTriangle();
+    //     // this.updatePhil();
+    //     this.updateSphere();
+    //     // this.updateSphere_counter -= steps * 3;
+    //     this.updateSphere_counter -= steps * 5;
+    // }
     
     
     this.renderer.render(this.scene, this.camera);
@@ -145,9 +208,56 @@ class Badge {
             this.phil.increasing = !this.phil.increasing;
     }
   }
+  handlePointerDown(e){
+    this.pause();
+    this.pointerIsDown = true;
+    this.pointerLastX = e.clientX;
+    this.pointerLastY = e.clientY;
+    this.renderer.domElement.style.cursor = 'grabbing';
+  }
+  handlePointerMove(e){
+    if(!this.pointerIsDown) return;
+    // console.log('move');
+    const dx = e.clientX - this.pointerLastX,
+    dy = e.clientY - this.pointerLastY;
+    this.pointerLastX = e.clientX;
+    this.pointerLastY = e.clientY;
+    const dev = 0.005;
+    // Rotate around fixed world axes so yaw stays stable after pitch.
+    this.rotateAroundWorldAxis(this.sphere, this.worldAxisX, dy * dev);
+    this.rotateAroundWorldAxis(this.sphere, this.worldAxisY, dx * dev);
+    this.updateSphere();
+    this.renderer.render(this.scene, this.camera);
+  }
+  
+  handlePointerUp(){
+    // console.log('up');
+    if(!this.pointerIsDown) return;
+    this.pointerIsDown = false;
+    this.resume();
+    this.renderer.domElement.style.cursor = 'grab';
+  }
+  handleTouchStart(e){
+    if (!e.touches || e.touches.length === 0) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    this.handlePointerDown(touch);
+  }
+  handleTouchMove(e){
+    if (!this.pointerIsDown) return;
+    if (!e.touches || e.touches.length === 0) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    this.handlePointerMove(touch);
+  }
+  rotateAroundWorldAxis(obj, axis, angle) {
+    // Custom world-axis rotation for builds lacking Object3D.rotateOnWorldAxis
+    this.tmpQuat.setFromAxisAngle(axis, angle);
+    obj.quaternion.multiplyQuaternions(this.tmpQuat, obj.quaternion);
+  }
   resume(){
     this.lastTime = null;
-    this.update();
+    this.animate();
   }
   pause(){
     if(this.timer) {
@@ -167,41 +277,3 @@ class Badge {
 
 const badgeContainer = document.getElementById('badge');
 const badge = new Badge(badgeContainer);
-
-// Example control wiring (uncomment if needed):
-// $('input[name=xRot]').on('input', function() {
-//   badge.xRot = parseFloat(this.value);
-// });
-// $('input[name=yRot]').on('input', function() {
-//   badge.yRot = parseFloat(this.value);
-// });
-// $('input[name=zRot]').on('input', function() {
-//   badge.zRot = parseFloat(this.value);
-// });
-// $('input[name=triangles]').on('input', function() {
-//   badge.triangles = parseInt(this.value);
-//   badge.updateSphere();
-// });
-// $('input[name=zCam]').on('input', function() {
-//   badge.camera.position.z = 2500 - parseInt(this.value);
-// });
-// $('input[name=radius]').on('input', function() {
-//   badge.radius = parseInt(this.value);
-//   badge.updateSphere();
-// });
-// $('input[name=phis]').on('input', function() {
-//   badge.phis = parseFloat(this.value);
-//   badge.updateSphere();
-// });
-// $('input[name=phil]').on('input', function() {
-//   badge.phil = parseFloat(this.value);
-//   badge.updateSphere();
-// });
-// $('input[name=thes]').on('input', function() {
-//   badge.thes = parseInt(this.value);
-//   badge.updateSphere();
-// });
-// $('input[name=thel]').on('input', function() {
-//   badge.thel = parseInt(this.value);
-//   badge.updateSphere();
-// });
