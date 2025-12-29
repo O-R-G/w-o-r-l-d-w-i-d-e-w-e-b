@@ -24,7 +24,8 @@ class Badge {
     this.thel = 3.14;
     this.triangles = {
         // current: 20,
-        current: 4,
+        // current: 4,
+        current: 3,
         max: 36,
         min: 2,
         step: 1,
@@ -150,6 +151,11 @@ class Badge {
       })
     );
     this.scene.add(this.sphere);
+console.log(this.sphere.geometry);
+console.log(this.sphere.geometry.isBufferGeometry);
+console.log(this.sphere.geometry);
+console.log(this.sphere.geometry.isBufferGeometry);
+
   }
 
   updateSphere() {
@@ -180,6 +186,27 @@ class Badge {
     this.sphere.rotation.y += this.yRot * frameDelta;
     this.sphere.rotation.z += this.zRot * frameDelta;
     this.updateSphere_counter += frameDelta; // accumulate frame-equivalent units
+
+/*
+    move a vertex i
+const i = 10;
+const geometry = this.sphere.geometry;
+const pos = geometry.attributes.position;
+const v = new THREE.Vector3(
+  pos.getX(i),
+  pos.getY(i),
+  pos.getZ(i)
+);
+v.normalize().multiplyScalar(0.2); // amount to move
+pos.setXYZ(
+  i,
+  pos.getX(i) + v.x,
+  pos.getY(i) + v.y,
+  pos.getZ(i) + v.z
+);
+console.log(this.sphere);
+*/
+
     // if (this.updateSphere_counter >= 3) {
     //     const steps = Math.floor(this.updateSphere_counter / 3);
     //     // for (let i = 0; i < steps; i++) {
