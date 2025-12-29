@@ -18,6 +18,7 @@ media/*.mp4
 media/*.mov
 media/*.webm
 media/*.webp
+media/pdf
 
 # macos
 .DS_Store
