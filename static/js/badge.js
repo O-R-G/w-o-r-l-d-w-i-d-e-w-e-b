@@ -17,11 +17,11 @@ class Badge {
     this.xRot = 0.001;
     this.yRot = 0.001;
     this.zRot = 0.001;
-    this.radius = 500;
+    this.radius = 400;
     this.phis = 180;
     // this.phil = 6.28;
     this.thes = 0;
-    this.thel = 3.14;
+    this.thel = Math.PI;
     this.triangles = {
         // current: 20,
         // current: 4,
@@ -32,15 +32,19 @@ class Badge {
         increasing: true
     };
     this.phil = {
-        current: 6.28,
+        current: Math.PI * 2,
         max: 6.28,
         min: -6.28,
         step: 0.005,
         increasing: false
     };
     this.updateSphere_counter = 0;
-
+    // this.vertexBasePositions = null;
+    // this.vertexCurrentPositions = null;
     this.timer = null;
+    this.currentTimeStamp = 0;
+    this.previousTimestamp = 0;
+    this.timestampDiff = 0;
     this.lastTime = null;
     this.isPlaying = true;
     this.pointerIsDown = false;
@@ -53,17 +57,18 @@ class Badge {
     this.isTouchDrag = false;
     this.suppressClick = false;
     this.menuIsExpanded = menu && !menu.classList.contains('hidden');
+    this.initialized = false;
     this.init();
     
     this.createSphere();
     this.animate();
+    this.initialized = true;
   }
 
   init() {
     this.size = Math.min(this.container.offsetWidth, this.container.offsetHeight)
     this.width = this.height = this.size;
     this.initStage();
-    // this.renderer.domElement.style.cursor = 'grab';
     this.renderer.domElement.style.touchAction = 'none';
     this.addListeners();
   }
@@ -135,27 +140,25 @@ class Badge {
     }
   }
   createSphere() {
+    const geo = new THREE.SphereGeometry(
+      this.radius,
+      this.triangles.current,
+      this.triangles.current,
+      this.phis,
+      Math.PI * 2,
+      this.thes,
+      Math.PI
+    );
+    console.log(geo.vertices.length);
+    geo.mergeVertices();
+
+    this.vertexBasePositions = geo.vertices.map((v) => v.clone());
+    console.log(geo.vertices.length);
     this.sphere = new THREE.Mesh(
-      new THREE.SphereGeometry(
-        this.radius,
-        this.triangles.current,
-        this.triangles.current,
-        this.phis,
-        this.phil.current,
-        this.thes,
-        this.thel
-      ),
-      new THREE.MeshBasicMaterial({
-        color: 0x00ff00,
-        wireframe: true
-      })
+      geo,
+      new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
     );
     this.scene.add(this.sphere);
-console.log(this.sphere.geometry);
-console.log(this.sphere.geometry.isBufferGeometry);
-console.log(this.sphere.geometry);
-console.log(this.sphere.geometry.isBufferGeometry);
-
   }
 
   updateSphere() {
@@ -177,14 +180,35 @@ console.log(this.sphere.geometry.isBufferGeometry);
 
   animate(timestamp = performance.now()) {
     if (!this.sphere) return;
-    // console.log('animate');
+    if(!this.lastTime && this.initialized !== false) {
+     
+      this.timestampDiff = timestamp - this.previousTimestamp;
+      this.previousTimestamp = false;
+      console.log('setting new timestampDiff');
+      console.log(timestamp - this.timestampDiff);
+    }
     this.timer = requestAnimationFrame((nextTs) => this.animate(nextTs));
+    // this.currentTimeStamp = timestamp;
     const frameDelta = this.lastTime ? (timestamp - this.lastTime) / 16.6667 : 1;
+    // if(!this.lastTime){
+    //   console.log(timestamp - this.timestampDiff);
+    // }
     this.lastTime = timestamp;
-    // console.log(this.sphere);
-    this.sphere.rotation.x += this.xRot * frameDelta;
-    this.sphere.rotation.y += this.yRot * frameDelta;
-    this.sphere.rotation.z += this.zRot * frameDelta;
+    
+    // this.sphere.rotation.x += this.xRot * frameDelta;
+    // this.sphere.rotation.y += this.yRot * frameDelta;
+    // this.sphere.rotation.z += this.zRot * frameDelta;
+
+    const verts = this.sphere.geometry.vertices;
+    for (let i = 0; i < verts.length; i++) {
+      const base = this.vertexBasePositions[i];
+      const n = 0.1 * Math.sin((this.lastTime - this.timestampDiff) * 0.0005 + i);
+      
+      verts[i].set(base.x + base.x * n, base.y + base.y * n, base.z + base.z * n);
+    }
+    // console.log(0.1 * Math.sin((this.lastTime - this.timestampDiff) * 0.0005 + 0))
+    this.sphere.geometry.verticesNeedUpdate = true;
+
     this.updateSphere_counter += frameDelta; // accumulate frame-equivalent units
 
 /*
@@ -312,7 +336,7 @@ console.log(this.sphere);
   }
   handleContainerClick(e){
     // preventing menu from opening when dragging
-    console.log(this.suppressClick, this.dragMoved);
+    // console.log(this.suppressClick, this.dragMoved);
     if (this.suppressClick || this.dragMoved) {
       e.stopPropagation();
       e.preventDefault();
@@ -324,12 +348,18 @@ console.log(this.sphere);
     obj.quaternion.multiplyQuaternions(this.tmpQuat, obj.quaternion);
   }
   resume(){
+    console.log('resume');
     this.lastTime = null;
     this.animate();
   }
   pause(){
+    console.log('pause');
+    
     if(this.timer) {
       cancelAnimationFrame(this.timer);
+      if(!this.previousTimestamp)
+        this.previousTimestamp = this.lastTime.toFixed(1);
+      // console.log(this.previousTimestamp);
       this.timer = null;
     }
   }
@@ -346,3 +376,10 @@ console.log(this.sphere);
 
 const canvasContainer = document.getElementById('badge');
 const badge = new Badge(canvasContainer);
+
+// setTimeout(()=>{
+//   badge.pause();
+//   setTimeout(()=>{
+//     badge.resume();
+//   }, 2000);
+// },2000);
