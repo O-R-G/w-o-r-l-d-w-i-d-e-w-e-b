@@ -39,6 +39,10 @@ if(!$uu->id) {
     }
 }
 ?>
+<script>
+    window.pauseBadgeRotation = <?php echo json_encode(isset($_GET['pauseBadgeRotation'])); ?>;
+    // console.log(pauseBadgeRotation);
+</script>
 <script type='text/javascript' src='/static/js/badge.js?v=2025120901'></script>
 <script type='text/javascript' src='/static/js/global.js'></script>
 <script type='text/javascript' src='/static/js/menu.js'></script>

@@ -185,9 +185,11 @@ class Badge {
     this.timer = requestAnimationFrame((nextTs) => this.animate(nextTs));
     const frameDelta = this.lastTime ? (timestamp - this.lastTime) / 16.6667 : 1;
     this.lastTime = timestamp;
-    this.sphere.rotation.x += this.xRot * frameDelta;
-    this.sphere.rotation.y += this.yRot * frameDelta;
-    this.sphere.rotation.z += this.zRot * frameDelta;
+    if(!pauseBadgeRotation) {
+      this.sphere.rotation.x += this.xRot * frameDelta;
+      this.sphere.rotation.y += this.yRot * frameDelta;
+      this.sphere.rotation.z += this.zRot * frameDelta;
+    }
     const verts = this.sphere.geometry.vertices;
     for (let i = 0; i < verts.length; i++) {
       const base = this.vertexBasePositions[i];
