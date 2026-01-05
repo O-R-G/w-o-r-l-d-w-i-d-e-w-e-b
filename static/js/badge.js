@@ -40,8 +40,7 @@ class Badge {
     };
     this.updateSphere_counter = 0;
     this.timer = null;
-    this.currentTimeStamp = 0;
-    this.previousTimestamp = 0;
+    this.timestampOnPause = false;
     this.timestampDiff = 0;
     this.lastTime = null;
     this.isPlaying = true;
@@ -180,22 +179,22 @@ class Badge {
   animate(timestamp = performance.now()) {
     if (!this.sphere) return;
     if(!this.lastTime && this.initialized !== false) {
-      this.timestampDiff += timestamp - this.previousTimestamp;
-      this.previousTimestamp = false;
+      this.timestampDiff += timestamp - this.timestampOnPause;
+      this.timestampOnPause = false;
     }
     this.timer = requestAnimationFrame((nextTs) => this.animate(nextTs));
     const frameDelta = this.lastTime ? (timestamp - this.lastTime) / 16.6667 : 1;
     this.lastTime = timestamp;
+    this.sphere.rotation.x += this.xRot * frameDelta;
+    this.sphere.rotation.y += this.yRot * frameDelta;
+    this.sphere.rotation.z += this.zRot * frameDelta;
     const verts = this.sphere.geometry.vertices;
     for (let i = 0; i < verts.length; i++) {
       const base = this.vertexBasePositions[i];
       const n = 0.1 * Math.sin((this.lastTime - this.timestampDiff) * 0.0005 + i);
-      
       verts[i].set(base.x + base.x * n, base.y + base.y * n, base.z + base.z * n);
     }
-    console.log(this.lastTime - this.timestampDiff);
     this.sphere.geometry.verticesNeedUpdate = true;
-
     this.updateSphere_counter += frameDelta; // accumulate frame-equivalent units
 
 /*
@@ -357,13 +356,9 @@ console.log(this.sphere);
     console.log('pause')
     if(this.timer) {
       cancelAnimationFrame(this.timer);
-      if(!this.previousTimestamp) {
-        
-        this.previousTimestamp = this.lastTime.toFixed(1);
-        console.log('setting previousTimestamp', this.previousTimestamp);
+      if(!this.timestampOnPause) {
+        this.timestampOnPause = this.lastTime.toFixed(1);
       }
-        
-      // console.log(this.previousTimestamp);
       this.timer = null;
     }
   }
