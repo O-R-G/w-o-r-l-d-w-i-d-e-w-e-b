@@ -167,8 +167,7 @@ blockquote {
 .large {
     /* vw = viewport width % */
     /* height based on width */
-	/* height: 80vh; */
-    height: 100vh;
+	height: 80vh;
 }
 
 .small {

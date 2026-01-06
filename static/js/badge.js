@@ -17,7 +17,7 @@ class Badge {
     this.xRot = 0.001;
     this.yRot = 0.001;
     this.zRot = 0.001;
-    this.radius = 400;
+    this.radius = this.container.classList.contains('large') ? 400 : 460;
     this.phis = 180;
     // this.phil = 6.28;
     this.thes = 0;
@@ -64,8 +64,10 @@ class Badge {
   }
 
   init() {
-    this.size = Math.min(this.container.offsetWidth, this.container.offsetHeight)
-    this.width = this.height = this.size;
+    // this.size = Math.min(this.container.offsetWidth, this.container.offsetHeight)
+    // this.width = this.height = this.size;
+    this.width = this.container.offsetWidth;
+    this.height = this.container.offsetHeight;
     this.initStage();
     this.renderer.domElement.style.touchAction = 'none';
     this.addListeners();
@@ -350,12 +352,12 @@ console.log(this.sphere);
     obj.quaternion.multiplyQuaternions(this.tmpQuat, obj.quaternion);
   }
   resume(){
-    console.log('resume');
+    // console.log('resume');
     this.lastTime = null;
     this.animate();
   }
   pause(){
-    console.log('pause')
+    // console.log('pause')
     if(this.timer) {
       cancelAnimationFrame(this.timer);
       if(!this.timestampOnPause) {
@@ -365,7 +367,7 @@ console.log(this.sphere);
     }
   }
   start_stop(){
-    console.log('start_stop');
+    // console.log('start_stop');
     if(this.isPlaying) {
         this.pause();
     } else {
