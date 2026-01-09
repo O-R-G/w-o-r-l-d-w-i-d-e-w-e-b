@@ -17,7 +17,7 @@ class Badge {
     this.xRot = 0.001;
     this.yRot = 0.001;
     this.zRot = 0.001;
-    this.radius = this.container.classList.contains('large') ? 400 : 460;
+    this.radius = this.container.classList.contains('large') ? 450 : 460;
     this.phis = 180;
     // this.phil = 6.28;
     this.thes = 0;
@@ -54,23 +54,26 @@ class Badge {
     this.dragMoved = false;
     this.isTouchDrag = false;
     this.suppressClick = false;
-    this.menuIsExpanded = menu && !menu.classList.contains('hidden');
+    this.resizeTimer = null;
     this.initialized = false;
     this.init();
     
+    
+  }
+
+  init() {
+    if(this.initialized) return;
+    this.setSize();
+    this.initStage();
+    this.renderer.domElement.style.touchAction = 'none';
+    this.addListeners();
     this.createSphere();
     this.animate();
     this.initialized = true;
   }
-
-  init() {
-    // this.size = Math.min(this.container.offsetWidth, this.container.offsetHeight)
-    // this.width = this.height = this.size;
+  setSize(){
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
-    this.initStage();
-    this.renderer.domElement.style.touchAction = 'none';
-    this.addListeners();
   }
   initStage(){
     this.scene = new THREE.Scene();
@@ -83,6 +86,7 @@ class Badge {
         alpha: true,
         antialias: true
     });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setClearColor(0x000000, 0);   
     this.renderer.setSize(this.width, this.height);
   }
@@ -130,14 +134,20 @@ class Badge {
         this.handlePointerUp();
       });
     }
-    // el.addEventListener('click', (event)=>{
-    //   this.handleClick(event);
-    // });
     if (this.container && this.container !== el) {
       this.container.addEventListener('click', (event)=>{
         this.handleContainerClick(event);
       }, true);
     }
+    window.addEventListener('resize', ()=>{
+      if(this.resizeTimer) {
+        clearTimeout(this.resizeTimer);
+      }
+      this.resizeTimer = setTimeout(()=>{
+        this.resizeTimer = null;
+        this.handleResize();
+      }, 100);
+    });
   }
   createSphere() {
     const geo = new THREE.SphereGeometry(
@@ -149,18 +159,16 @@ class Badge {
       this.thes,
       Math.PI
     );
-    console.log(geo.vertices.length);
     geo.mergeVertices();
 
     this.vertexBasePositions = geo.vertices.map((v) => v.clone());
-    console.log(geo.vertices.length);
     this.sphere = new THREE.Mesh(
       geo,
       new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
     );
     this.scene.add(this.sphere);
   }
-
+  
   updateSphere() {
     if (!this.scene || !this.sphere) {
       // console.log('r');
@@ -177,7 +185,26 @@ class Badge {
     // this.sphere.rotation.y = oldRotationY;
     // this.sphere.rotation.z = oldRotationZ;
   }
-
+  disposeSphere(){
+    this.sphere.parent?.remove(this.sphere);
+    if(this.sphere.geomotry) this.sphere.geomotry.dispose();
+    if (this.sphere.material) {
+      if (Array.isArray(this.sphere.material)) {
+        this.sphere.material.forEach(this.disposeMaterial);
+      } else {
+        this.disposeMaterial(this.sphere.material);
+      }
+    }
+  }
+  disposeMaterial(material) {
+    for (const key in material) {
+      const value = material[key];
+      if (value && value.isTexture) {
+        value.dispose();
+      }
+    }
+    material.dispose();
+  }
   animate(timestamp = performance.now()) {
     if (!this.sphere) return;
     if(!this.lastTime && this.initialized !== false) {
@@ -302,7 +329,6 @@ console.log(this.sphere);
       setTimeout(() => { this.suppressClick = false; }, 0);
     }
     this.isTouchDrag = false;
-    console.log();
     if(this.isFrozen) {
       // hiding menu
       this.isFrozen = false;
@@ -345,6 +371,19 @@ console.log(this.sphere);
       e.stopPropagation();
       e.preventDefault();
     }
+  }
+  handleResize(){
+    this.pause();
+    this.setSize();
+    // this.initStage();
+    this.renderer.setSize(this.width, this.height);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Update camera
+    this.camera.aspect = this.width / this.height;
+    this.camera.updateProjectionMatrix();
+    this.disposeSphere();
+    this.createSphere();
+    this.resume();
   }
   rotateAroundWorldAxis(obj, axis, angle) {
     // Custom world-axis rotation for builds lacking Object3D.rotateOnWorldAxis
