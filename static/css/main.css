@@ -328,8 +328,12 @@ blockquote {
     */
     .make #body img {
         margin-left: 0px;
+        filter: invert(100%);
     }
     .make video {
         display: none;
+    }
+    body {
+        color:#000;
     }
 }
