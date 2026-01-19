@@ -1,4 +1,3 @@
-
 /* 
     badge.js
      
@@ -13,18 +12,19 @@ class Badge {
     this.container = container;
     if (!this.container) return;
     this.menu = menu;
-
-    this.xRot = 0.001;
-    this.yRot = 0.001;
-    this.zRot = 0.001;
+    this.speed = 6;
+    this.speed_delta = 0.05;
+    const rot_delta_min = 0.001;
+    const rot_delta_max = 0.01;
+    this.rot_delta = Math.random() * (rot_delta_max - rot_delta_min) + rot_delta_min;
+    this.xRot = Math.random() * (rot_delta_max - rot_delta_min) + rot_delta_min;
+    this.yRot = Math.random() * (rot_delta_max - rot_delta_min) + rot_delta_min;
+    this.zRot = Math.random() * (rot_delta_max - rot_delta_min) + rot_delta_min;
     this.radius = 500;
     this.phis = 180;
-    // this.phil = 6.28;
     this.thes = 0;
     this.thel = 3.14;
     this.triangles = {
-        // current: 20,
-        // current: 4,
         current: 3,
         max: 36,
         min: 2,
@@ -39,7 +39,6 @@ class Badge {
         increasing: false
     };
     this.updateSphere_counter = 0;
-
     this.timer = null;
     this.lastTime = null;
     this.isPlaying = true;
@@ -53,8 +52,7 @@ class Badge {
     this.isTouchDrag = false;
     this.suppressClick = false;
     this.menuIsExpanded = menu && !menu.classList.contains('hidden');
-    this.init();
-    
+    this.init();    
     this.createSphere();
     this.animate();
   }
@@ -151,11 +149,6 @@ class Badge {
       })
     );
     this.scene.add(this.sphere);
-console.log(this.sphere.geometry);
-console.log(this.sphere.geometry.isBufferGeometry);
-console.log(this.sphere.geometry);
-console.log(this.sphere.geometry.isBufferGeometry);
-
   }
 
   updateSphere() {
@@ -163,64 +156,18 @@ console.log(this.sphere.geometry.isBufferGeometry);
       // console.log('r');
       return;
     }
-    // this.sphere.needsUpdate = true;
-    // const oldRotationX = this.sphere.rotation.x;
-    // const oldRotationY = this.sphere.rotation.y;
-    // const oldRotationZ = this.sphere.rotation.z;
-    // this.scene.remove(this.sphere);
-    // this.createSphere();
-    // console.log(oldRotationX, oldRotationY);
-    // this.sphere.rotation.x = oldRotationX;
-    // this.sphere.rotation.y = oldRotationY;
-    // this.sphere.rotation.z = oldRotationZ;
   }
 
   animate(timestamp = performance.now()) {
     if (!this.sphere) return;
-    // console.log('animate');
+    this.speed = Math.max(0.5, this.speed - Math.sin((this.speed_delta * Math.PI) / 2));    // ease out sine
     this.timer = requestAnimationFrame((nextTs) => this.animate(nextTs));
-    const frameDelta = this.lastTime ? (timestamp - this.lastTime) / 16.6667 : 1;
+    const frameDelta = this.lastTime ? (timestamp - this.lastTime) / 16.6667 * this.speed: 1;
     this.lastTime = timestamp;
-    // console.log(this.sphere);
     this.sphere.rotation.x += this.xRot * frameDelta;
     this.sphere.rotation.y += this.yRot * frameDelta;
     this.sphere.rotation.z += this.zRot * frameDelta;
     this.updateSphere_counter += frameDelta; // accumulate frame-equivalent units
-
-/*
-    move a vertex i
-const i = 10;
-const geometry = this.sphere.geometry;
-const pos = geometry.attributes.position;
-const v = new THREE.Vector3(
-  pos.getX(i),
-  pos.getY(i),
-  pos.getZ(i)
-);
-v.normalize().multiplyScalar(0.2); // amount to move
-pos.setXYZ(
-  i,
-  pos.getX(i) + v.x,
-  pos.getY(i) + v.y,
-  pos.getZ(i) + v.z
-);
-console.log(this.sphere);
-*/
-
-    // if (this.updateSphere_counter >= 3) {
-    //     const steps = Math.floor(this.updateSphere_counter / 3);
-    //     // for (let i = 0; i < steps; i++) {
-    //     //     this.updateTriangle();
-    //     //     this.updatePhil();
-    //     // }
-    //     // this.updateTriangle();
-    //     // this.updatePhil();
-    //     this.updateSphere();
-    //     // this.updateSphere_counter -= steps * 3;
-    //     this.updateSphere_counter -= steps * 5;
-    // }
-    
-    
     this.renderer.render(this.scene, this.camera);
   }
   updateTriangle(){
