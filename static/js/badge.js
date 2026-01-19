@@ -12,6 +12,7 @@ class Badge {
     this.container = container;
     if (!this.container) return;
     this.menu = menu;
+    /*
     this.speed = 6;
     this.speed_delta = 0.05;
     const rot_delta_min = 0.001;
@@ -20,6 +21,10 @@ class Badge {
     this.xRot = Math.random() * (rot_delta_max - rot_delta_min) + rot_delta_min;
     this.yRot = Math.random() * (rot_delta_max - rot_delta_min) + rot_delta_min;
     this.zRot = Math.random() * (rot_delta_max - rot_delta_min) + rot_delta_min;
+    */
+    this.xRot = .001;
+    this.yRot = .001;
+    this.zRot = .001;
     this.radius = 500;
     this.phis = 180;
     this.thes = 0;
@@ -148,6 +153,10 @@ class Badge {
         wireframe: true
       })
     );
+
+    this.sphere.rotation.x = Math.random() * Math.PI;
+    this.sphere.rotation.y = Math.random() * Math.PI;
+    this.sphere.rotation.z = Math.random() * Math.PI;    
     this.scene.add(this.sphere);
   }
 
@@ -160,9 +169,12 @@ class Badge {
 
   animate(timestamp = performance.now()) {
     if (!this.sphere) return;
-    this.speed = Math.max(0.5, this.speed - Math.sin((this.speed_delta * Math.PI) / 2));    // ease out sine
     this.timer = requestAnimationFrame((nextTs) => this.animate(nextTs));
+    /*
+    this.speed = Math.max(0.5, this.speed - Math.sin((this.speed_delta * Math.PI) / 2));    // ease out sine
     const frameDelta = this.lastTime ? (timestamp - this.lastTime) / 16.6667 * this.speed: 1;
+    */
+    const frameDelta = this.lastTime ? (timestamp - this.lastTime) / 16.6667: 1;
     this.lastTime = timestamp;
     this.sphere.rotation.x += this.xRot * frameDelta;
     this.sphere.rotation.y += this.yRot * frameDelta;
