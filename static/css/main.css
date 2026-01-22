@@ -253,7 +253,8 @@ blockquote {
     margin-top: 0;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #000;
+    /* border-bottom: 1px solid #000; */
+    border-bottom: 1px solid #FFF;
     font-size: 10px;
     line-height: 15px;
     break-inside: avoid;
@@ -328,12 +329,18 @@ blockquote {
     */
     .make #body img {
         margin-left: 0px;
-        filter: invert(100%);
     }
     .make video {
         display: none;
     }
+    .make #notes {
+        border-bottom: 1px solid #000;
+    }
+    #notes {
+        border-top: 1px solid #000;
+    }
     body {
         color:#000;
+        background-color: #FFF;
     }
 }
