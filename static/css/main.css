@@ -347,4 +347,7 @@ blockquote {
     a:visited {
         color: #090;
     }    
+    img.invert {
+        filter: grayscale(100%) invert(100%);
+    }
 }
