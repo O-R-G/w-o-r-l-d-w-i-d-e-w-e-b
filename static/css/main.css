@@ -343,4 +343,8 @@ blockquote {
         color:#000;
         background-color: #FFF;
     }
+    a:link,
+    a:visited {
+        color: #090;
+    }    
 }
