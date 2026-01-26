@@ -343,10 +343,12 @@ blockquote {
         color:#000;
         background-color: #FFF;
     }
+    /*
     a:link,
     a:visited {
         color: #090;
-    }    
+    }
+    */
     img.invert {
         filter: grayscale(100%) invert(100%);
     }
